@@ -29,7 +29,65 @@ function getCategories(req, res) {
     });
 }
 
+function interceptCategory(req, res, next) {
+    const id = req.params.id;
+
+    Category.findById(id, (err, category) => {
+        if (err) {
+            return res.send(err);
+        }
+
+        if (!category) {
+            return res.sendStatus(404);
+        }
+        req.category = category;
+        next();
+    });
+}
+
+function getCategory(req, res) {
+    const category = req.category;
+
+    if (category) {
+        res.json(category);
+    }
+}
+
+function editCategory(req, res) {
+    const category = req.category;
+
+    if (category) {
+        Object.keys(req.body)
+            .forEach(key => category[key] = req.body[key]);
+
+        category.save(err => {
+            if (err) {
+                return res.send(err);
+            }
+            res.status(201).send(category);
+        });
+    }
+}
+
+function deleteCategory(req, res) {
+    const category = req.category;
+
+    if (category) {
+        category.remove(err => {
+            if (err) {
+                return res.send(err);
+            }
+
+            return res.sendStatus(204);
+        });
+    }
+}
+
 module.exports = {
+    interceptCategory,
     addNewCategory,
     getCategories,
+    editCategory,
+    getCategory,
+    deleteCategory,
 };
