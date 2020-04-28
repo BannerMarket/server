@@ -1,49 +1,65 @@
 const Translation = require('../../models/translation.model');
 
-function translationResolver(req, res, next) {
+function setTranslation(req, res) {
     const key = req.params.key;
 
     Translation.findById(key, (err, translation) => {
-       if (err) {
-           return res.send(err);
-       }
-
-       if (translation) {
-           req.translation = translation;
-           return next();
-       }
-
-        return next();
-    });
-}
-
-function setTranslation(req, res) {
-    const key = req.params.key;
-    const alreadyExists = !!req.translation;
-
-    let translation;
-
-    if (alreadyExists) {
-        translation = req.translation;
-        translation.en = req.body.en;
-        translation.ge = req.body.ge;
-    } else {
-        translation = new Translation({...req.body, _id: key});
-    }
-
-    translation.save(err => {
         if (err) {
             return res.send(err);
         }
-        res.status(201).send(translation);
+
+        if (translation) {
+            translation.en = req.body.en;
+            translation.ge = req.body.ge;
+        } else {
+            translation = new Translation({...req.body, _id: key});
+        }
+
+        translation.save(err => {
+            if (err) {
+                return res.send(err);
+            }
+            res.status(201).send(translation);
+        });
     });
 }
 
 function getTranslation(req, res) {
-    if (req.translation) {
-        return res.json(req.translation);
-    }
-    return res.sendStatus(404);
+    const key = req.params.key;
+
+    Translation.findById(key, (err, translation) => {
+        if (err) {
+            return res.send(err);
+        }
+
+        if (translation) {
+            return res.json(translation);
+        }
+
+        return res.sendStatus(404);
+    });
+}
+
+function removeTranslation(req, res) {
+    const key = req.params.key;
+
+    Translation.findById(key, (err, translation) => {
+        if (err) {
+            return res.send(err);
+        }
+
+        if (translation) {
+            return translation.remove(err => {
+                if (err) {
+                    return res.send(err);
+                }
+
+                return res.sendStatus(204);
+            })
+        }
+
+        return res.sendStatus(404);
+    });
 }
 
 function getDictionary(req, res) {
@@ -72,8 +88,8 @@ function getDictionary(req, res) {
 }
 
 module.exports = {
-    translationResolver,
     setTranslation,
     getTranslation,
+    removeTranslation,
     getDictionary
 };
