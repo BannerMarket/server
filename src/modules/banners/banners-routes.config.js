@@ -4,7 +4,9 @@ const ROUTES = {
     // Get or edit a specific banner with full data
     banner: '/banners/banner/:id',
     // Get banners for the list and map view
-    bannersMain: '/banners/main'
+    bannersMain: '/banners/main',
+    // Upload banner images
+    bannerImages: '/banners/upload/images'
 };
 
 module.exports = ROUTES;
