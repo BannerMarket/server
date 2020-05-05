@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
 
-const bannerModel = new Schema({
+const fullBannerModel = new Schema({
     lat: {type: Number},
     lng: {type: Number},
     categories: [{type: String}],
@@ -14,4 +14,4 @@ const bannerModel = new Schema({
     images: [{type: String}]
 });
 
-module.exports = mongoose.model('Banner', bannerModel);
+module.exports = mongoose.model('FullBanner', fullBannerModel);
