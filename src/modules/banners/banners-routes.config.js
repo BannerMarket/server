@@ -6,7 +6,9 @@ const ROUTES = {
     // Get banners for the list and map view
     bannersMain: '/banners/main',
     // Upload banner images
-    bannerImages: '/banners/upload/images'
+    bannerImages: '/banners/full/images/:id',
+    // Delete banner images
+    bannerDeleteImages: '/banner/full/images/delete/:id'
 };
 
 module.exports = ROUTES;

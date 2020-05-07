@@ -9,5 +9,10 @@ module.exports = {
 
     unique: function (arr) {
         return Array.from(new Set(arr));
+    },
+
+    getFileName: function (fileUrl) {
+        const tokens = fileUrl.split('/');
+        return tokens[tokens.length - 1];
     }
 };

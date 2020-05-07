@@ -1,11 +1,12 @@
 const Translation = require('../../models/translation.model');
+const { send } = require('../../utils/response-utils');
 
 function setTranslation(req, res) {
     const key = req.params.key;
 
     Translation.findById(key, (err, translation) => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
 
         if (translation) {
@@ -17,9 +18,9 @@ function setTranslation(req, res) {
 
         translation.save(err => {
             if (err) {
-                return res.send(err);
+                send(res, 500, err);
             }
-            res.status(201).send(translation);
+            send(res, 201, null, translation);
         });
     });
 }
@@ -29,14 +30,14 @@ function getTranslation(req, res) {
 
     Translation.findById(key, (err, translation) => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
 
         if (translation) {
-            return res.json(translation);
+            return send(res, 200, null, translation);
         }
 
-        return res.sendStatus(404);
+        return send(res, 404, `Translation with key ${key} not found`);
     });
 }
 
@@ -45,20 +46,20 @@ function removeTranslation(req, res) {
 
     Translation.findById(key, (err, translation) => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
 
         if (translation) {
             return translation.remove(err => {
                 if (err) {
-                    return res.send(err);
+                    return send(res, 500, err);
                 }
 
-                return res.sendStatus(204);
+                return send(res, 204);
             })
         }
 
-        return res.sendStatus(404);
+        return send(res, 404, `Translation with key ${key} not found`);
     });
 }
 
@@ -68,22 +69,24 @@ function getDictionary(req, res) {
     const withSelectedLanguage = (dictionary, translation) => ({...dictionary, [translation['_id']]: translation[language]});
 
     if (!language) {
-        return res.sendStatus(404);
+        return send(res, 400, `No language argument was supplied`);
     }
 
 
     Translation.find({}, (err, translations) => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
 
         if (translations) {
-            return res.json(translations
+            const dictionary = translations
                 .filter(hasSelectedLanguage)
-                .reduce(withSelectedLanguage, {}));
+                .reduce(withSelectedLanguage, {});
+
+            return send(res, 200, null, dictionary);
         }
 
-        return res.sendStatus(404);
+        return send(res, 404, `No dictionary for ${language}`);
     });
 }
 

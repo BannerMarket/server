@@ -1,4 +1,5 @@
 const Category = require('../../models/category.model');
+const { send } = require('../../utils/response-utils');
 
 function addNewCategory(req, res) {
     const name = req.body.name;
@@ -6,16 +7,16 @@ function addNewCategory(req, res) {
     const sortOrder = typeof req.body.sortOrder === 'number' ? req.body.sortOrder : NaN;
 
     if (!name || Number.isNaN(sortOrder)) {
-        return res.sendStatus(400);
+        return send(res, 400, `Bad arguments`);
     }
 
     const category = new Category({name, parentId, sortOrder});
 
     category.save(err => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
-        res.status(200).json(category);
+        send(res, 200, null, category);
     });
 }
 
@@ -23,9 +24,9 @@ function getCategories(req, res) {
     const query = req.query;
     Category.find(query, (err, categories) => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
-        res.json(categories);
+        send(res, 200, null, categories);
     });
 }
 
@@ -34,11 +35,11 @@ function interceptCategory(req, res, next) {
 
     Category.findById(id, (err, category) => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
 
         if (!category) {
-            return res.sendStatus(404);
+            return send(res, 404, `Category with id ${id} not found`);
         }
         req.category = category;
         next();
@@ -49,7 +50,7 @@ function getCategory(req, res) {
     const category = req.category;
 
     if (category) {
-        res.json(category);
+        return send(res, 200, null, category);
     }
 }
 
@@ -62,9 +63,9 @@ function editCategory(req, res) {
 
         category.save(err => {
             if (err) {
-                return res.send(err);
+                return send(res, 500, err);
             }
-            res.status(201).send(category);
+            send(res, 201, null, category);
         });
     }
 }
@@ -75,10 +76,10 @@ function deleteCategory(req, res) {
     if (category) {
         category.remove(err => {
             if (err) {
-                return res.send(err);
+                return send(res, 500, err);
             }
 
-            return res.sendStatus(204);
+            return send(res, 204);
         });
     }
 }

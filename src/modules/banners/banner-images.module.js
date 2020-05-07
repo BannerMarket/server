@@ -1,4 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
+const { send } = require('../../utils/response-utils');
+fs = require('fs');
 
 function _getFileExtension(fileName) {
     const tokens = fileName.split('.');
@@ -6,8 +8,12 @@ function _getFileExtension(fileName) {
 }
 
 function uploadImages(req, res) {
+    if (!req.banner) {
+        return;
+    }
+
     if (!req.files || Object.keys(req.files).length === 0) {
-        return res.status(400).send('No files were uploaded.');
+        return send(res, 400, 'No files were uploaded.');
     }
 
     const fileNames = Object.keys(req.files);
@@ -26,11 +32,55 @@ function uploadImages(req, res) {
         const allProcessed = results.length === fileNames.length;
 
         if (allProcessed) {
-            await res.json(results);
+            _addImagesToBanner(req, res, results);
         }
     });
 }
 
+function _addImagesToBanner(req, res, results) {
+    const banner = req.banner;
+    const urls = results.map(res => res.path);
+    banner.images = [...req.banner.images, ...urls];
+    banner.save(err => {
+       if (err) {
+           return send(res, 500, err);
+       }
+
+       send(res, 201, null, results);
+    });
+}
+
+async function deleteImages(req, res) {
+    const imageNames = req.body['imgNames'];
+    const banner = req.banner;
+
+    if (!banner) {
+        return;
+    }
+
+    if (!Array.isArray(imageNames)) {
+        return send(res, 400, `Bad arguments`);
+    }
+
+    banner.images = banner.images
+        .filter(image => !imageNames.some(imageNameToRemove => image.includes(imageNameToRemove)));
+
+    banner.save(err => {
+        if (err) {
+            return send(res, 500, err);
+        }
+        send(res, 200);
+        _deleteImages(imageNames);
+    });
+}
+
+function _deleteImages(imageNames) {
+    imageNames.forEach(imageName => {
+        fs.unlink(`./public/images/banners/${imageName}`, error => { })
+    });
+}
+
 module.exports = {
-    uploadImages
+    uploadImages,
+    deleteImages
 };

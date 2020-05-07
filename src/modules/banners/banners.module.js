@@ -1,30 +1,16 @@
-const mongoose = require('mongoose');
-const Utils = require('../../utils/utils');
-const Box = require('../../utils/box');
 const FullBanner = require('../../models/full-banner.model');
-const Category = require('../../models/category.model');
-
-function resolveCategories(req, res, categoryIds, next) {
-    const query = {'_id': {$in: categoryIds.map(categoryId => mongoose.Types.ObjectId(categoryId, {}))}};
-    Category.find(query, (err, categories) => {
-        if (err) {
-            return res.send(err);
-        }
-
-        next(categories);
-    });
-}
+const { send } = require('../../utils/response-utils');
 
 function interceptBanner(req, res, next) {
     const id = req.params.id;
 
     FullBanner.findById(id, (err, banner) => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
 
         if (!banner) {
-            return res.sendStatus(404);
+            return send(res, 404, `Banner with this id ${req.params.id} not found`);
         }
         req.banner = banner;
         next();
@@ -35,25 +21,10 @@ function getFullBanners(req, res) {
     const query = req.query;
     FullBanner.find(query, (err, banners) => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
 
-        res.json(banners);
-
-        // const categoryIds = new Box(banners)
-        //     .map(banners => banners.map(banner => banner.categories))
-        //     .map(Utils.flatten)
-        //     .fold(Utils.unique);
-        //
-        // resolveCategories(req, res, categoryIds, (categories) => {
-        //     banners.forEach(banner => {
-        //         banner.categories = banner.categories
-        //             .map(categoryId => categories.find(category => category._id == categoryId));
-        //     });
-        //
-        //
-        //     res.json(banners);
-        // });
+        send(res, 200, null, banners);
     });
 }
 
@@ -78,7 +49,7 @@ function addNewBanner(req, res) {
         !titleGe || !titleEn ||
         !shortDescriptionGe || !shortDescriptionEn ||
         !fullDescriptionGe || !shortDescriptionEn) {
-        return res.sendStatus(400);
+        return send(res, 400, 'Bad params');
     }
 
     const banner = new FullBanner({
@@ -92,9 +63,9 @@ function addNewBanner(req, res) {
 
     banner.save(err => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
-        res.status(200).json(banner);
+        send(res, 200, null, banner);
     });
 }
 
@@ -102,7 +73,7 @@ function getFullBanner(req, res) {
     const banner = req.banner;
 
     if (banner) {
-        res.json(banner);
+        send(res, 200, null, banner);
     }
 }
 
@@ -142,9 +113,9 @@ function editFullBanner(req, res) {
 
     banner.save(err => {
         if (err) {
-            return res.send(err);
+            return send(res, 500, err);
         }
-        res.status(201).send(banner);
+        send(res, 201, null, banner);
     });
 }
 
@@ -152,12 +123,13 @@ function deleteFullBanner(req, res) {
     const banner = req.banner;
 
     if (banner) {
+        // TODO delete banner images
         banner.remove(err => {
             if (err) {
-                return res.send(err);
+                return send(res, 500, err);
             }
 
-            return res.sendStatus(204);
+            send(res, 204);
         });
     }
 }
