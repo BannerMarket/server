@@ -70,11 +70,11 @@ async function deleteImages(req, res) {
             return send(res, 500, err);
         }
         send(res, 200);
-        _deleteImages(imageNames);
+        deleteImageFiles(imageNames);
     });
 }
 
-function _deleteImages(imageNames) {
+function deleteImageFiles(imageNames) {
     imageNames.forEach(imageName => {
         fs.unlink(`./public/images/banners/${imageName}`, error => { })
     });
@@ -82,5 +82,6 @@ function _deleteImages(imageNames) {
 
 module.exports = {
     uploadImages,
-    deleteImages
+    deleteImages,
+    deleteImageFiles,
 };

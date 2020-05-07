@@ -1,4 +1,6 @@
 const FullBanner = require('../../models/full-banner.model');
+const Utils = require('../../utils/utils');
+const { deleteImageFiles } = require('./banner-images.module');
 const { send } = require('../../utils/response-utils');
 
 function interceptBanner(req, res, next) {
@@ -123,11 +125,14 @@ function deleteFullBanner(req, res) {
     const banner = req.banner;
 
     if (banner) {
-        // TODO delete banner images
         banner.remove(err => {
             if (err) {
                 return send(res, 500, err);
             }
+
+            const imageNames = banner.images
+                .map(Utils.getFileName);
+            deleteImageFiles(imageNames);
 
             send(res, 204);
         });
