@@ -3,7 +3,7 @@ module.exports = {
         if (error) {
             res.status(code).json({error, code});
         } else if (data) {
-            res.status(code).json({data, code});
+            res.status(code).json({data, code, success: true});
         } else {
             res.status(code).json({code});
         }
