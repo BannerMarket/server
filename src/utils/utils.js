@@ -14,5 +14,17 @@ module.exports = {
     getFileName: function (fileUrl) {
         const tokens = fileUrl.split('/');
         return tokens[tokens.length - 1];
+    },
+
+    removeUndefinedValues: function (obj) {
+        const result = {};
+
+        Object.keys(obj).forEach(key => {
+            if (key && typeof obj[key] !== 'undefined') {
+                result[key] = obj[key];
+            }
+        });
+
+        return result;
     }
 };

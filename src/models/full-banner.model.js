@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
 
-const fullBannerModel = new Schema({
+const FullBannerModel = new Schema({
     lat: {
         type: Number,
         required: [true, 'Please add latitude']
@@ -60,4 +60,20 @@ const fullBannerModel = new Schema({
     }
 });
 
-module.exports = mongoose.model('FullBanner', fullBannerModel);
+FullBannerModel.index({ location: '2dsphere' });
+
+FullBannerModel.pre('save', function(next) {
+    this.lat = Number(this.lat);
+    this.lng = Number(this.lng);
+    this.categories = this.categories ? this.categories : [];
+    this.images = this.images ? this.images : [];
+
+    this.location = {
+        type: 'Point',
+        coordinates: [this.lat, this.lng]
+    };
+
+    next();
+});
+
+module.exports = mongoose.model('FullBanner', FullBannerModel);
