@@ -12,6 +12,10 @@ const categoryModel = new Schema({
     sortOrder: {
         type: Number,
         required: [true, 'please add sort order']
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
 });
 

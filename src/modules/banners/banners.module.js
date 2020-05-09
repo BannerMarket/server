@@ -2,148 +2,105 @@ const FullBanner = require('../../models/full-banner.model');
 const Utils = require('../../utils/utils');
 const { deleteImageFiles } = require('./banner-images.module');
 const { send } = require('../../utils/response-utils');
+const { handleError } = require('../../utils/error-handler');
 
-function interceptBanner(req, res, next) {
-    const id = req.params.id;
+// @desc Get banner by id
+// @access Public
+exports.interceptBanner = async (req, res, next) => {
+    try {
+        const id = req.params.id;
 
-    FullBanner.findById(id, (err, banner) => {
-        if (err) {
-            return send(res, 500, err);
-        }
+        const banner = await FullBanner.findById(id);
 
         if (!banner) {
-            return send(res, 404, `Banner with this id ${req.params.id} not found`);
+            return send(res, 404, `Banner with id ${req.params.id} was not found`);
         }
+
         req.banner = banner;
         next();
-    });
-}
+    } catch (e) {
+        handleError(res, e, 500);
+    }
+};
 
-function getFullBanners(req, res) {
-    const query = req.query;
-    FullBanner.find(query, (err, banners) => {
-        if (err) {
-            return send(res, 500, err);
-        }
-
+// @desc Get all banners filtered by the query
+// @route GET /banners/full
+// @access Public
+exports.getFullBanners = async (req, res) => {
+    try {
+        const query = req.query;
+        const banners = await FullBanner.find(query);
         send(res, 200, null, banners);
-    });
-}
-
-function addNewBanner(req, res) {
-    const lat = Number(req.body.lat);
-    const lng = Number(req.body.lng);
-
-    const categories = Array.isArray(req.body.categories) ? req.body.categories : [];
-
-    const titleGe = typeof req.body.titleGe === 'string' ? req.body.titleGe : '';
-    const titleEn = typeof req.body.titleEn === 'string' ? req.body.titleEn : '';
-
-    const shortDescriptionGe = typeof req.body.shortDescriptionGe === 'string' ? req.body.shortDescriptionGe : '';
-    const shortDescriptionEn = typeof req.body.shortDescriptionEn === 'string' ? req.body.shortDescriptionEn : '';
-
-    const fullDescriptionGe = typeof req.body.fullDescriptionGe === 'string' ? req.body.fullDescriptionGe : '';
-    const fullDescriptionEn = typeof req.body.fullDescriptionEn === 'string' ? req.body.fullDescriptionEn : '';
-
-    const images = Array.isArray(req.body.images) ? req.body.images : [];
-
-    if (Number.isNaN(lat) || Number.isNaN(lng) ||
-        !titleGe || !titleEn ||
-        !shortDescriptionGe || !shortDescriptionEn ||
-        !fullDescriptionGe || !shortDescriptionEn) {
-        return send(res, 400, 'Bad params');
+    } catch (e) {
+        handleError(res, e, 500);
     }
+};
 
-    const banner = new FullBanner({
-        lat, lng,
-        categories,
-        titleGe, titleEn,
-        shortDescriptionGe, shortDescriptionEn,
-        fullDescriptionGe, fullDescriptionEn,
-        images
-    });
-
-    banner.save(err => {
-        if (err) {
-            return send(res, 500, err);
-        }
+// @desc Add new banner
+// @route POST /banners/full
+// @access Public
+// todo make access Private
+exports.addNewBanner = async (req, res) => {
+    try {
+        const banner = new FullBanner(req.body);
+        await banner.save();
         send(res, 200, null, banner);
-    });
-}
+    } catch (e) {
+        handleError(res, e, 500);
+    }
+};
 
-function getFullBanner(req, res) {
+// @desc Get banner by id
+// @route GET /banners/full/banner/:id
+// @access Public
+exports.getFullBanner = (req, res) => {
     const banner = req.banner;
 
     if (banner) {
         send(res, 200, null, banner);
     }
-}
+};
 
-function editFullBanner(req, res) {
-    const banner = req.banner;
+// @desc Edit banner
+// @route POST /banners/full/banner/:id
+// @access Public
+// todo make access Private
+exports.editFullBanner = async (req, res) => {
+    try {
+        const banner = req.banner;
 
-    if (!banner) {
-        return;
-    }
-
-    const lat = Number(req.body.lat) || banner.lat;
-    const lng = Number(req.body.lng) || banner.lng;
-
-    const categories = Array.isArray(req.body.categories) ? req.body.categories : banner.categories;
-
-    const titleGe = typeof req.body.titleGe === 'string' ? req.body.titleGe : banner.titleGe;
-    const titleEn = typeof req.body.titleEn === 'string' ? req.body.titleEn : banner.titleEn;
-
-    const shortDescriptionGe = typeof req.body.shortDescriptionGe === 'string' ? req.body.shortDescriptionGe : banner.shortDescriptionGe;
-    const shortDescriptionEn = typeof req.body.shortDescriptionEn === 'string' ? req.body.shortDescriptionEn : banner.shortDescriptionEn;
-
-    const fullDescriptionGe = typeof req.body.fullDescriptionGe === 'string' ? req.body.fullDescriptionGe : banner.fullDescriptionGe;
-    const fullDescriptionEn = typeof req.body.fullDescriptionEn === 'string' ? req.body.fullDescriptionEn : banner.fullDescriptionEn;
-
-    const images = Array.isArray(req.body.images) ? req.body.images : banner.images;
-
-    banner.lat = lat;
-    banner.lng = lng;
-    banner.categories = categories;
-    banner.titleGe = titleGe;
-    banner.titleEn = titleEn;
-    banner.shortDescriptionGe = shortDescriptionGe;
-    banner.shortDescriptionEn = shortDescriptionEn;
-    banner.fullDescriptionGe = fullDescriptionGe;
-    banner.fullDescriptionEn = fullDescriptionEn;
-    banner.images = images;
-
-    banner.save(err => {
-        if (err) {
-            return send(res, 500, err);
+        if (!banner) {
+            return;
         }
-        send(res, 201, null, banner);
-    });
-}
 
-function deleteFullBanner(req, res) {
-    const banner = req.banner;
+        Object.keys(req.body)
+            .forEach(key => banner[key] = req.body[key]);
 
-    if (banner) {
-        banner.remove(err => {
-            if (err) {
-                return send(res, 500, err);
-            }
-
-            const imageNames = banner.images
-                .map(Utils.getFileName);
-            deleteImageFiles(imageNames);
-
-            send(res, 204);
-        });
+        await banner.save();
+        send(res, 200, null, banner);
+    } catch (e) {
+        handleError(res, e, 500);
     }
-}
+};
 
-module.exports = {
-    getFullBanners,
-    addNewBanner,
-    interceptBanner,
-    getFullBanner,
-    editFullBanner,
-    deleteFullBanner,
+// @desc Delete banner with all it's images
+// @route DELETE /banners/full/banner/:id
+// @access Public
+// todo make access Private
+exports.deleteFullBanner = async (req, res) => {
+    try {
+        const banner = req.banner;
+
+        if (!banner) {
+            return;
+        }
+
+        await banner.remove();
+        const imageNames = banner.images.map(Utils.getFileName);
+        deleteImageFiles(imageNames);
+
+        send(res, 200);
+    } catch (e) {
+        handleError(res, e, 500);
+    }
 };

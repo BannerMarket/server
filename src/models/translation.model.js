@@ -14,6 +14,10 @@ const translationModel = new Schema({
         type: String,
         required: [true, "Please add Georgian translation"],
         trim: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
 });
 
