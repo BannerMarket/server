@@ -10,14 +10,14 @@ const FullBannerModel = new Schema({
         type: Number,
         required: [true, 'Please add longitude']
     },
-    // directionsGe: {
-    //     type: String,
-    //     required: [true, 'Please add directions in Georgian']
-    // },
-    // directionsEn: {
-    //     type: String,
-    //     required: [true, 'Please add directions in English']
-    // },
+    directionsGe: {
+        type: String,
+        required: [true, 'Please add directions in Georgian']
+    },
+    directionsEn: {
+        type: String,
+        required: [true, 'Please add directions in English']
+    },
     location: {
         type: {
             type: String,
