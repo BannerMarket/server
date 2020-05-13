@@ -1,5 +1,5 @@
 const ROUTES = {
-    autocomplete: '/places/autocomplete'
+    autocomplete: '/places/autocomplete/:sessiontoken/:input'
 };
 
 module.exports = ROUTES;

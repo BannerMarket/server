@@ -1,6 +1,11 @@
 const Category = require('../../models/category.model');
 const { send } = require('../../utils/response-utils');
 const { handleError } = require('../../utils/error-handler');
+const mongoose = require('mongoose');
+
+const replaceIdWithCategories = (categoryIds, categories) => {
+    return categoryIds.map(categoryId => categories.find(category => category._id == categoryId));
+};
 
 // @desc Get category by id
 // @access Public
@@ -18,6 +23,19 @@ exports.interceptCategory = async (req, res, next) => {
   } catch (e) {
       handleError(res, e, 500);
   }
+};
+
+// @desc Get banners with full category data instead of only categoryIds
+exports.resolveCategories = async (banners) => {
+    const categoryIds = banners
+        .map(banner => banner.categories)
+        .reduce((categoryIds, curr) => categoryIds.concat(curr), []);
+
+    const query = {'_id': {$in: categoryIds.map(categoryId => mongoose.Types.ObjectId(categoryId, {}))}};
+    const categories = await Category.find(query);
+
+    return banners
+        .map(banner => ({...banner, categories: replaceIdWithCategories(banner.categories, categories)}));
 };
 
 // @desc Add new category

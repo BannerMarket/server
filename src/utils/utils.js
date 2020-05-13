@@ -1,4 +1,4 @@
-module.exports = {
+const Utils = {
     safeString: function (str) {
         return typeof str === 'string' ? str : '';
     },
@@ -26,5 +26,41 @@ module.exports = {
         });
 
         return result;
-    }
+    },
+
+    getResponseLanguage: function (language) {
+        return language && language === 'en' ? 'en' : 'ka';
+    },
+
+    extractBannerForLanguage: function(language) {
+        return language === 'en' ? Utils.extractBannerInEnglish : Utils.extractBannerInGeorgian;
+    },
+
+    extractBannerInGeorgian: function (fullBanner) {
+        return {
+            lat: fullBanner.lat,
+            lng: fullBanner.lng,
+            directions: fullBanner.directionsGe,
+            categories: fullBanner.categories,
+            title: fullBanner.titleGe,
+            shortDescription: fullBanner.shortDescriptionGe,
+            fullDescription: fullBanner.fullDescriptionGe,
+            images: fullBanner.images,
+        }
+    },
+
+    extractBannerInEnglish: function (fullBanner) {
+        return {
+            lat: fullBanner.lat,
+            lng: fullBanner.lng,
+            directions: fullBanner.directionsEn,
+            categories: fullBanner.categories,
+            title: fullBanner.titleEn,
+            shortDescription: fullBanner.shortDescriptionEn,
+            fullDescription: fullBanner.fullDescriptionEn,
+            images: fullBanner.images,
+        }
+    },
 };
+
+ module.exports = Utils;
