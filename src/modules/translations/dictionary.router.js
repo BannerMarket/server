@@ -1,17 +1,17 @@
 const express = require('express');
 const ROUTES = require('./dictionary-routes.config');
-const dictionary = require('./dictionary.module');
+const {getTranslation, setTranslation, removeTranslation, getDictionary} = require('./dictionary.module');
 
 function routes() {
     const dictionaryRouter = express.Router();
 
     dictionaryRouter.route(ROUTES.translation)
-        .get(dictionary.getTranslation)
-        .put(dictionary.setTranslation)
-        .delete(dictionary.removeTranslation);
+        .get(getTranslation)
+        .put(setTranslation)
+        .delete(removeTranslation);
 
     dictionaryRouter.route(ROUTES.dictionary)
-        .get(dictionary.getDictionary);
+        .get(getDictionary);
 
     return dictionaryRouter;
 }

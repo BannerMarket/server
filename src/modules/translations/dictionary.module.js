@@ -1,12 +1,15 @@
 const Translation = require('../../models/translation.model');
+const { send } = require('../../utils/response-utils');
+const { handleError } = require('../../utils/error-handler');
 
-function setTranslation(req, res) {
-    const key = req.params.key;
-
-    Translation.findById(key, (err, translation) => {
-        if (err) {
-            return res.send(err);
-        }
+// @desc Add new translation or update old one
+// @route PUT /dictionary/by-key/:key
+// @access Public
+// todo make access Private
+exports.setTranslation = async (req, res) => {
+    try {
+        const key = req.params.key;
+        let translation = await Translation.findById(key);
 
         if (translation) {
             translation.en = req.body.en;
@@ -15,81 +18,73 @@ function setTranslation(req, res) {
             translation = new Translation({...req.body, _id: key});
         }
 
-        translation.save(err => {
-            if (err) {
-                return res.send(err);
-            }
-            res.status(201).send(translation);
-        });
-    });
-}
-
-function getTranslation(req, res) {
-    const key = req.params.key;
-
-    Translation.findById(key, (err, translation) => {
-        if (err) {
-            return res.send(err);
-        }
-
-        if (translation) {
-            return res.json(translation);
-        }
-
-        return res.sendStatus(404);
-    });
-}
-
-function removeTranslation(req, res) {
-    const key = req.params.key;
-
-    Translation.findById(key, (err, translation) => {
-        if (err) {
-            return res.send(err);
-        }
-
-        if (translation) {
-            return translation.remove(err => {
-                if (err) {
-                    return res.send(err);
-                }
-
-                return res.sendStatus(204);
-            })
-        }
-
-        return res.sendStatus(404);
-    });
-}
-
-function getDictionary(req, res) {
-    const language = req.query.language;
-    const hasSelectedLanguage = translation => !!translation[language];
-    const withSelectedLanguage = (dictionary, translation) => ({...dictionary, [translation['_id']]: translation[language]});
-
-    if (!language) {
-        return res.sendStatus(404);
+        const updated = await translation.save();
+        send(res, 200, null, updated);
+    } catch (e) {
+        handleError(res, e, 500);
     }
-
-
-    Translation.find({}, (err, translations) => {
-        if (err) {
-            return res.send(err);
-        }
-
-        if (translations) {
-            return res.json(translations
-                .filter(hasSelectedLanguage)
-                .reduce(withSelectedLanguage, {}));
-        }
-
-        return res.sendStatus(404);
-    });
-}
-
-module.exports = {
-    setTranslation,
-    getTranslation,
-    removeTranslation,
-    getDictionary
 };
+
+// @desc Get translation
+// @route GET /dictionary/by-key/:key
+// @access Public
+exports.getTranslation = async (req, res) => {
+    try {
+        const key = req.params.key;
+        const translation = await Translation.findById(key);
+
+        if (!translation) {
+            return send(res, 404, `Translation with key ${key} not found`);
+        }
+
+        send(res, 200, null, translation);
+    } catch (e) {
+        handleError(res, e, 500);
+    }
+};
+
+// @desc Remove translation
+// @route DELETE /dictionary/by-key/:key
+// @access Public
+// todo make access Private
+exports.removeTranslation = async (req, res) => {
+    try {
+        const key = req.params.key;
+        const translation = await Translation.findById(key);
+
+        if (!translation) {
+            return send(res, 404, `Translation with key ${key} not found`);
+        }
+
+        await translation.remove();
+        send(res, 204);
+    } catch (e) {
+        handleError(res, e, 500);
+    }
+};
+
+// @desc Get all translations for specified language
+// @route GET /dictionary/by-language/:language
+// @access Public
+exports.getDictionary = async (req, res) => {
+    try {
+        const language = req.query.language;
+        const hasSelectedLanguage = translation => !!translation[language];
+        const withSelectedLanguage = (dictionary, translation) => ({...dictionary, [translation['_id']]: translation[language]});
+
+        if (!language) {
+            return send(res, 400, `No language argument was supplied`);
+        }
+
+        const translations = await Translation.find({});
+
+        const dictionary = translations
+            .filter(hasSelectedLanguage)
+            .reduce(withSelectedLanguage, {});
+
+        send(res, 200, null, dictionary);
+    } catch (e) {
+        handleError(res, e, 500);
+    }
+};
+
