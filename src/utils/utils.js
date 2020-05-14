@@ -38,6 +38,7 @@ const Utils = {
 
     extractBannerInGeorgian: function (fullBanner) {
         return {
+            _id: fullBanner._id,
             lat: fullBanner.lat,
             lng: fullBanner.lng,
             directions: fullBanner.directionsGe,
@@ -51,6 +52,7 @@ const Utils = {
 
     extractBannerInEnglish: function (fullBanner) {
         return {
+            _id: fullBanner._id,
             lat: fullBanner.lat,
             lng: fullBanner.lng,
             directions: fullBanner.directionsEn,

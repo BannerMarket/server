@@ -12,9 +12,15 @@ const fetchSuggestions = async (input, language, sessiontoken) => {
     return await axios.get(encodeURI(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${input}&location=${location}&radius=${radius}&strictbounds&key=${process.env.MAPS_API_KEY}&sessiontoken=${sessiontoken}&components=country:${country}&language=${language}`));
 };
 
+const formatDescription = (description) => {
+    return description
+        .replace(', საქართველო', '')
+        .replace(', Georgia', '');
+};
+
 const mapSuggestions = (suggestions) => {
     return suggestions.map(suggestion => ({
-        description: suggestion['description'],
+        description: formatDescription(suggestion['description']),
         id: suggestion['place_id'],
     }));
 };

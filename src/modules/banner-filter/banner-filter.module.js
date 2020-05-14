@@ -48,8 +48,8 @@ const _buildQuery = (coordinates, categories) => {
 // @desc Filter and sort banners by the query
 exports.interceptBanners = async (req, res, next) => {
     try {
-        const coordinates = await _getCoordinates(req.body.lat, req.body.lng, encodeURIComponent(req.body.address));
-        const categories = Array.isArray(req.params.categories) ? req.params.categories : undefined;
+        const coordinates = await _getCoordinates(req.query.lat, req.query.lng, encodeURIComponent(req.query.address));
+        const categories = Array.isArray(req.query.categories) ? req.query.categories : undefined;
         const query = _buildQuery(coordinates, categories);
         req.banners = await FullBanner.find(query);
         next();
@@ -64,7 +64,7 @@ exports.interceptBanners = async (req, res, next) => {
 exports.getBanners = async (req, res) => {
     try {
         if (req.banners) {
-            const language = Utils.getResponseLanguage(req.params.language);
+            const language = Utils.getResponseLanguage(req.query.language);
             const formatted = req.banners.map(Utils.extractBannerForLanguage(language));
             const withCategories = await categories.resolveCategories(formatted);
             send(res, 200, null, withCategories);

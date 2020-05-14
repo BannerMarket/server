@@ -57,8 +57,7 @@ exports.addNewCategory = async (req, res) => {
 // @access Public
 exports.getCategories = async (req, res) => {
     try {
-        const query = req.query;
-        const categories = await Category.find(query);
+        const categories = await Category.find({});
 
         send(res, 200, null, categories);
     } catch (e) {
