@@ -49,7 +49,7 @@ const _buildQuery = (coordinates, categories) => {
 exports.interceptBanners = async (req, res, next) => {
     try {
         const coordinates = await _getCoordinates(req.query.lat, req.query.lng, encodeURIComponent(req.query.address));
-        const categories = Array.isArray(req.query.categories) ? req.query.categories : undefined;
+        const categories = typeof req.query.categories === 'string' ? req.query.categories.split(',') : undefined;
         const query = _buildQuery(coordinates, categories);
         req.banners = await FullBanner.find(query);
         next();
