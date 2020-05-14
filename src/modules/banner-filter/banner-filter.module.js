@@ -45,11 +45,23 @@ const _buildQuery = (coordinates, categories) => {
     return Utils.removeUndefinedValues(query);
 };
 
+const _extractCategories = (categoriesStr) => {
+    if (typeof categoriesStr !== 'string') {
+        return null;
+    }
+
+    const tokenized = categoriesStr
+        .split(',')
+        .filter(token => !!token.trim());
+
+    return tokenized.length === 0 ? null : tokenized;
+};
+
 // @desc Filter and sort banners by the query
 exports.interceptBanners = async (req, res, next) => {
     try {
         const coordinates = await _getCoordinates(req.query.lat, req.query.lng, encodeURIComponent(req.query.address));
-        const categories = typeof req.query.categories === 'string' ? req.query.categories.split(',') : undefined;
+        const categories = _extractCategories(req.query.categories);
         const query = _buildQuery(coordinates, categories);
         req.banners = await FullBanner.find(query);
         next();
