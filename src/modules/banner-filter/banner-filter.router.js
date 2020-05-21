@@ -10,6 +10,9 @@ function routes() {
     bannerFilterRouter.route(ROUTES.banners)
         .get(banners.getBanners);
 
+    bannerFilterRouter.route(ROUTES.bannerCount)
+        .get(banners.countBanners);
+
     return bannerFilterRouter;
 }
 

@@ -29,17 +29,10 @@ const _getCoordinates = async (lat, lng, address) => {
     return DEFAULT_QUERY_COORDINATES;
 };
 
-const _buildQuery = (coordinates, categories) => {
+const _buildQuery = (coordinates = null, categories = null) => {
     const query = {
-        categories: categories ? { "$all" : categories}: undefined,
-        location: {
-            $near: {
-                $geometry:{
-                    type: "Point",
-                    coordinates: coordinates
-                }
-            }
-        }
+        categories: categories ? { "$all" : categories} : undefined,
+        location: coordinates ? {$near: {$geometry:{type: "Point", coordinates: coordinates}}} : undefined
     };
 
     return Utils.removeUndefinedValues(query);
@@ -62,8 +55,14 @@ exports.interceptBanners = async (req, res, next) => {
     try {
         const coordinates = await _getCoordinates(req.query.lat, req.query.lng, encodeURIComponent(req.query.address));
         const categories = _extractCategories(req.query.categories);
+        const skip = req.query.skip ? Number(req.query.skip) : 0;
+        const limit = req.query.limit ? Number(req.query.limit) : 50;
+
         const query = _buildQuery(coordinates, categories);
-        req.banners = await FullBanner.find(query);
+        req.banners = await FullBanner
+            .find(query)
+            .skip(skip)
+            .limit(limit);
         next();
     } catch (e) {
         handleError(res, e, 500);
@@ -86,5 +85,15 @@ exports.getBanners = async (req, res) => {
     }
 };
 
+exports.countBanners = async (req, res) => {
+    try {
+        const categories = _extractCategories(req.query.categories);
+        const query = _buildQuery(null, categories);
 
+        const count = await FullBanner.count(query);
+        send(res, 200, null, count);
+    } catch (e) {
+        handleError(res, e, 500);
+    }
+};
 
