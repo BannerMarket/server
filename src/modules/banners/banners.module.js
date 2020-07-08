@@ -3,6 +3,7 @@ const Utils = require('../../utils/utils');
 const { deleteImageFiles } = require('./banner-images.module');
 const { send } = require('../../utils/response-utils');
 const { handleError } = require('../../utils/error-handler');
+const categories = require('../categories/categories.module');
 
 // @desc Get banner by id
 // @access Public
@@ -100,6 +101,21 @@ exports.deleteFullBanner = async (req, res) => {
         deleteImageFiles(imageNames);
 
         send(res, 200);
+    } catch (e) {
+        handleError(res, e, 500);
+    }
+};
+
+exports.getLanguageBanner = async (req, res) => {
+    try {
+        const banner = req.banner;
+
+        if (banner) {
+            const language = Utils.getResponseLanguage(req.query.language);
+            const langBanner = Utils.extractBannerForLanguage(language)(banner);
+            const withCategories = (await categories.resolveCategories([langBanner]))[0];
+            send(res, 200, null, withCategories);
+        }
     } catch (e) {
         handleError(res, e, 500);
     }

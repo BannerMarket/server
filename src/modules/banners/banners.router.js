@@ -9,6 +9,7 @@ function routes() {
     bannerRouter.use(ROUTES.fullBanner, banners.interceptBanner);
     bannerRouter.use(ROUTES.bannerImages, banners.interceptBanner);
     bannerRouter.use(ROUTES.bannerDeleteImages, banners.interceptBanner);
+    bannerRouter.use(ROUTES.banner, banners.interceptBanner);
 
     bannerRouter.route(ROUTES.fullBanners)
         .get(banners.getFullBanners)
@@ -24,6 +25,9 @@ function routes() {
 
     bannerRouter.route(ROUTES.bannerDeleteImages)
         .post(images.deleteImages);
+
+    bannerRouter.route(ROUTES.banner)
+        .get(banners.getLanguageBanner);
 
     return bannerRouter;
 }

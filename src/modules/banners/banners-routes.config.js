@@ -6,7 +6,9 @@ const ROUTES = {
     // Upload banner images
     bannerImages: '/banners/full/images/:id',
     // Delete banner images
-    bannerDeleteImages: '/banner/full/images/delete/:id'
+    bannerDeleteImages: '/banner/full/images/delete/:id',
+
+    banner: '/banner/:id'
 };
 
 module.exports = ROUTES;
