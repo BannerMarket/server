@@ -36,6 +36,11 @@ const Utils = {
         return language === 'en' ? Utils.extractBannerInEnglish : Utils.extractBannerInGeorgian;
     },
 
+    getFileExtension: function(fileName) {
+        const tokens = typeof fileName === 'string' ? fileName.split('.') : [];
+        return tokens.length > 0 ? tokens[tokens.length - 1] : '';
+    },
+
     extractBannerInGeorgian: function (fullBanner) {
         return {
             _id: fullBanner._id,

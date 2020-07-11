@@ -1,12 +1,9 @@
 const { v4: uuidv4 } = require('uuid');
 const { send } = require('../../utils/response-utils');
 const { handleError } = require('../../utils/error-handler');
+const { getFileExtension } = require('../../utils/utils');
 fs = require('fs');
 
-const _getFileExtension = (fileName) => {
-    const tokens = typeof fileName === 'string' ? fileName.split('.') : [];
-    return tokens.length > 0 ? tokens[tokens.length - 1] : '';
-};
 
 const _addImagesToBanner = async (req, res, results) => {
     const banner = req.banner;
@@ -39,7 +36,7 @@ exports.uploadImages = async (req, res) => {
         for (let i = 0; i < fileNames.length; i++) {
             const fileName = fileNames[i];
             const file = req.files[fileName];
-            const fileExtension = _getFileExtension(fileName);
+            const fileExtension = getFileExtension(fileName);
             const newFileName = `${uuidv4()}.${fileExtension}`;
             file.name = newFileName;
 
