@@ -5,6 +5,7 @@ const bannerFilterRouter = require('./src/modules/banner-filter/banner-filter.ro
 const placesAutocompleteRouter = require('./src/modules/place-autocomplete/places-autocomplete.router')();
 const priceRequestRouter = require('./src/modules/price-request/price-request.router')();
 const heroImagesRouter = require('./src/modules/hero-images/hero-images.router')();
+const promotedBannersRouter = require('./src/modules/promoted-banner/promoted-banner.router')();
 
 const API_ROOT = 'api';
 const API_VERSION = '1';
@@ -18,6 +19,7 @@ function route(app) {
     app.use(API_PREFIX, placesAutocompleteRouter);
     app.use(API_PREFIX, priceRequestRouter);
     app.use(API_PREFIX, heroImagesRouter);
+    app.use(API_PREFIX, promotedBannersRouter);
 }
 
 module.exports = route;
