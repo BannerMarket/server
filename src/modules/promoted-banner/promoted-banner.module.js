@@ -9,7 +9,7 @@ const _getLanguageBanners = async (banners, language) => {
     const languageBanners = [];
 
     for (let i = 0; i < banners.length; i++) {
-        const langBanner = Utils.extractBannerForLanguage(language)(banners[0]);
+        const langBanner = Utils.extractBannerForLanguage(language)(banners[i]);
         const withCategories = (await categories.resolveCategories([langBanner]))[0];
         languageBanners.push(withCategories);
     }
