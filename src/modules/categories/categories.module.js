@@ -2,6 +2,7 @@ const Category = require('../../models/category.model');
 const { send } = require('../../utils/response-utils');
 const { handleError } = require('../../utils/error-handler');
 const mongoose = require('mongoose');
+const { isAuthorized } = require('../auth/auth.module');
 
 const replaceIdWithCategories = (categoryIds, categories) => {
     return categoryIds.map(categoryId => categories.find(category => category._id == categoryId));
@@ -41,9 +42,12 @@ exports.resolveCategories = async (banners) => {
 // @desc Add new category
 // @route POST /categories
 // @access Public
-// todo make access Private
 exports.addNewCategory = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const category = new Category(req.body);
         await category.save();
         send(res, 200, null, category);
@@ -79,9 +83,12 @@ exports.getCategory = (req, res) => {
 // @desc Edit category by id
 // @route POST /categories/category/:id
 // @access Public
-// todo make access Private
 exports.editCategory = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const category = req.category;
 
         if (!category) {
@@ -101,9 +108,12 @@ exports.editCategory = async (req, res) => {
 // @desc Delete category by id
 // @route DELETE /categories/category/:id
 // @access Public
-// todo make access Private
 exports.deleteCategory = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const category = req.category;
 
         if (!category) {

@@ -59,9 +59,12 @@ exports.uploadImages = async (req, res) => {
 // @desc Delete banner images
 // @route POST /banner/full/images/delete/:id
 // @access Public
-// todo make access Private
 exports.deleteImages = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const imageNames = req.body['imgNames'];
         const banner = req.banner;
 

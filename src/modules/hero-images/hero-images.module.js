@@ -4,6 +4,7 @@ const { handleError } = require('../../utils/error-handler');
 const { getFileExtension } = require('../../utils/utils');
 const HeroImage = require('../../models/hero-image.model');
 fs = require('fs');
+const { isAuthorized } = require('../auth/auth.module');
 
 const _saveImages = async (results) => {
     for (let i = 0; i < results.length; i++) {
@@ -14,6 +15,10 @@ const _saveImages = async (results) => {
 
 exports.upload = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const fileNames = Object.keys(req.files);
         const results = [];
 
@@ -38,6 +43,10 @@ exports.upload = async (req, res) => {
 
 exports.delete = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const imgId = req.body['imgId'];
 
         if (!imgId) {

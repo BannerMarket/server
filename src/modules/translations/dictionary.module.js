@@ -1,13 +1,17 @@
 const Translation = require('../../models/translation.model');
 const { send } = require('../../utils/response-utils');
 const { handleError } = require('../../utils/error-handler');
+const { isAuthorized } = require('../auth/auth.module');
 
 // @desc Add new translation or update old one
 // @route PUT /dictionary/by-key/:key
 // @access Public
-// todo make access Private
 exports.setTranslation = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const key = req.params.key;
         let translation = await Translation.findById(key);
 
@@ -46,9 +50,12 @@ exports.getTranslation = async (req, res) => {
 // @desc Remove translation
 // @route DELETE /dictionary/by-key/:key
 // @access Public
-// todo make access Private
 exports.removeTranslation = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const key = req.params.key;
         const translation = await Translation.findById(key);
 

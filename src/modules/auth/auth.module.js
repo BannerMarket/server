@@ -65,9 +65,13 @@ exports.isAuthorized = async (req) => {
     }
 
     const {_id} = await jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN_SECRET);
-    const user = await Administrator.findById(_id);
 
-    return !!user;
+    try {
+        const user = await Administrator.findById(_id);
+        return !!user;
+    } catch (e) {
+        return false;
+    }
 };
 
 exports.isAuthenticated = async (req, res) => {

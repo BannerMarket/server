@@ -4,6 +4,7 @@ const { deleteImageFiles } = require('./banner-images.module');
 const { send } = require('../../utils/response-utils');
 const { handleError } = require('../../utils/error-handler');
 const categories = require('../categories/categories.module');
+const { isAuthorized } = require('../auth/auth.module');
 
 // @desc Get banner by id
 // @access Public
@@ -40,9 +41,12 @@ exports.getFullBanners = async (req, res) => {
 // @desc Add new banner
 // @route POST /banners/full
 // @access Public
-// todo make access Private
 exports.addNewBanner = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const banner = new FullBanner(req.body);
         await banner.save();
         send(res, 200, null, banner);
@@ -65,9 +69,12 @@ exports.getFullBanner = (req, res) => {
 // @desc Edit banner
 // @route POST /banners/full/banner/:id
 // @access Public
-// todo make access Private
 exports.editFullBanner = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const banner = req.banner;
 
         if (!banner) {
@@ -87,9 +94,12 @@ exports.editFullBanner = async (req, res) => {
 // @desc Delete banner with all it's images
 // @route DELETE /banners/full/banner/:id
 // @access Public
-// todo make access Private
 exports.deleteFullBanner = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const banner = req.banner;
 
         if (!banner) {
