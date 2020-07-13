@@ -8,6 +8,12 @@ function routes() {
     router.route(ROUTES.register)
         .post(auth.register);
 
+    router.route(ROUTES.login)
+        .post(auth.login);
+
+    router.route(ROUTES.isAuthenticated)
+        .get(auth.isAuthenticated);
+
     return router;
 }
 

@@ -3,6 +3,7 @@ const ROUTES = {
     logout: '/auth/logout',
     register: '/auth/register',
     token: '/auth/token',
+    isAuthenticated: '/auth/is-authenticated',
 };
 
 module.exports = ROUTES;
