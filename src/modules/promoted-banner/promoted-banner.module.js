@@ -4,12 +4,13 @@ const PromotedBanner = require('../../models/promoted-banner');
 const FullBanner = require('../../models/full-banner.model');
 const Utils = require('../../utils/utils');
 const categories = require('../categories/categories.module');
+const { isAuthorized } = require('../auth/auth.module');
 
 const _getLanguageBanners = async (banners, language) => {
     const languageBanners = [];
 
     for (let i = 0; i < banners.length; i++) {
-        const langBanner = Utils.extractBannerForLanguage(language)(banners[0]);
+        const langBanner = Utils.extractBannerForLanguage(language)(banners[i]);
         const withCategories = (await categories.resolveCategories([langBanner]))[0];
         languageBanners.push(withCategories);
     }
@@ -34,6 +35,10 @@ exports.getBanners = async (req, res) => {
 
 exports.addBanner = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         await (new PromotedBanner(req.body)).save();
         send(res, 200);
     } catch (e) {
@@ -43,13 +48,16 @@ exports.addBanner = async (req, res) => {
 
 exports.removeBanner = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const bannerId = req.params.id;
         const banner = await PromotedBanner.find({bannerId});
 
         for (let i = 0; i < banner.length; i++) {
             await banner[i].remove();
         }
-
         send(res, 200);
     } catch (e) {
         handleError(res, e, 500);
