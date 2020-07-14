@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const { send } = require('../../utils/response-utils');
 const { handleError } = require('../../utils/error-handler');
 const { getFileExtension } = require('../../utils/utils');
+const { isAuthorized } = require('../auth/auth.module');
 fs = require('fs');
 
 
@@ -23,9 +24,12 @@ module.exports.deleteImageFiles = (imageNames) => {
 // @desc Add new image to the banner
 // @route POST /banners/full/images/:id
 // @access Public
-// todo make access Private
 exports.uploadImages = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         if (!req.banner) {
             return;
         }
@@ -55,9 +59,12 @@ exports.uploadImages = async (req, res) => {
 // @desc Delete banner images
 // @route POST /banner/full/images/delete/:id
 // @access Public
-// todo make access Private
 exports.deleteImages = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const imageNames = req.body['imgNames'];
         const banner = req.banner;
 

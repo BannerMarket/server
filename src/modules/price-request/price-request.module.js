@@ -1,13 +1,17 @@
 const { send } = require('../../utils/response-utils');
 const { handleError } = require('../../utils/error-handler');
 const PriceRequest = require('../../models/price-request.module');
+const { isAuthorized } = require('../auth/auth.module');
 
 // @desc Get all price requests
 // @route GET /price-request/requests
 // @access Public
-// todo make access Private
 exports.getRequests = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const query = req.query;
         const priceRequests = await PriceRequest.find(query);
         send(res, 200, null, priceRequests);
@@ -32,9 +36,12 @@ exports.addRequest = async (req, res) => {
 // @desc Remove price request
 // @route DELETE /price-request/requests/:id
 // @access Public
-// todo make access Private
 exports.removeRequest = async (req, res) => {
     try {
+        if (!(await isAuthorized(req))) {
+            return send(res, 401, {message: 'Not authorized!'});
+        }
+
         const id = req.params.id;
 
         if (!id) {
